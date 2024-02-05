@@ -6,7 +6,7 @@
 
 ### User-Agent Helper
 
-::: SmartMixin.Default
+::: SmartMixin.Clash
     options:
         heading_level: 4
 

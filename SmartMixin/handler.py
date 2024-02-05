@@ -1,9 +1,9 @@
 import io
+import copy
 import requests
 import yaml
-import copy
-from .query import WrapperList, select
-from .UA import Default, Stash, ClashforWindows
+from .helpers import WrapperList, select
+from .UA import Clash
 
 
 class Proxy:
@@ -467,7 +467,7 @@ class Config:
     It can be initialized with a URL, a YAML string, a file, or a dictionary (YAML representation).
     """
 
-    def __init__(self, Url: str = None, YAML: str = None, File: io.TextIOWrapper = None, DICT: dict = None, UA: str = Default("1.11.0")) -> None:
+    def __init__(self, Url: str = None, YAML: str = None, File: io.TextIOWrapper = None, DICT: dict = None, UA: str = Clash("1.11.0")) -> None:
         """
         Initialize the Config with a URL, a YAML string, a file, or a dictionary (YAML representation).
 
