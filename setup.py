@@ -13,7 +13,7 @@ setup(
     long_description=long_description,
     author="_Fervor_",
     url="https://github.com/UFervor/SmartMixin",
-    version='2.3.1',
+    version='2.4.0',
     packages=find_packages(),
     install_requires=[
         'requests',

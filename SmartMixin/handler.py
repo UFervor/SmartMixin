@@ -110,6 +110,7 @@ class Proxy:
 
         return f"<PreProcessor.Proxy object {self.name} at {hex(id(self))}>"
 
+    @staticmethod
     def BATCH(YAML) -> list:
         """
         Create a list of Proxy objects from a YAML string.
@@ -224,25 +225,55 @@ class Rule:
         """
         Set the properties of the rule from a YAML string.
 
+        Supports rule strings where the comma-delimited parts are split on commas
+        that are not enclosed in parentheses. For example:
+            "AND,((NETWORK,UDP),(DST-PORT,443),(GEOSITE,youtube)),REJECT"
+        will be parsed as:
+            ["AND", "((NETWORK,UDP),(DST-PORT,443),(GEOSITE,youtube))", "REJECT"]
+
+        If "no-resolve" is present in the parts, it is removed and self.no_resolve is set to True.
+
         Args:
             YAML (str): A string representing a rule in YAML format.
         """
+        def split_rule(s: str) -> list:
+            parts = []
+            current = []
+            level = 0
+            for char in s:
+                if char == ',' and level == 0:
+                    parts.append(''.join(current).strip())
+                    current = []
+                else:
+                    if char == '(':
+                        level += 1
+                    elif char == ')':
+                        if level > 0:
+                            level -= 1
+                        else:
+                            raise ValueError("Unexpected closing parenthesis")
+                    current.append(char)
+            if level != 0:
+                raise ValueError("Syntax Error: Unclosed parenthesis in rule")
+            if current:
+                parts.append(''.join(current).strip())
+            return parts
 
-        tmp = YAML.split(",")
-        if "no-resolve" in tmp:
+        parts = split_rule(YAML)
+        if "no-resolve" in parts:
             self.no_resolve = True
-            tmp.remove("no-resolve")
+            parts.remove("no-resolve")
         else:
             self.no_resolve = False
 
-        if len(tmp) == 3:
-            self.type = tmp[0]
-            self.argument = tmp[1]
-            self.policy = tmp[2]
+        if len(parts) == 3:
+            self.type = parts[0]
+            self.argument = parts[1]
+            self.policy = parts[2]
         else:
             self.type = None
-            self.argument = tmp[0]
-            self.policy = tmp[1]
+            self.argument = parts[0]
+            self.policy = parts[1]
 
     def delete(self) -> None:
         """
@@ -264,6 +295,7 @@ class Rule:
 
         return f"<PreProcessor.Rule object {self.YAML} at {hex(id(self))}>"
 
+    @staticmethod
     def BATCH(YAML: str) -> list:
         """
         Create a list of Rule objects from a YAML string.
@@ -440,6 +472,7 @@ class ProxyGroup:
 
         return f"<PreProcessor.ProxyGroup object {self.name} at {hex(id(self))}>"
 
+    @staticmethod
     def BATCH(YAML: str) -> list:
         """
         Create a list of ProxyGroup objects from a YAML string.
